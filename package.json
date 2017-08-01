@@ -1,0 +1,16 @@
+{
+  "name": "ci-telegram",
+  "version": "0.0.1",
+  "description": "Telegram client for Central Intelligence System",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ci-client": "github:mikko/CentralIntelligence-client",
+    "node-telegram-bot-api": "^0.27.1"
+  }
+}
