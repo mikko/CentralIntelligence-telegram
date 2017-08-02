@@ -9,7 +9,7 @@ const bot = new TelegramBot(token, {polling: true});
 
 const client = new CIClient(CIconfig);
 
-const messageReceiver = (message, context) => {
+const messageReceiver = (action, message, context) => {
     console.log(`Message received from Central Intelligence ${message}`);
     console.log(JSON.stringify(context, null, 2));
     bot.sendMessage(context.msg.chat.id, message);
