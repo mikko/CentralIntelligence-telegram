@@ -51,8 +51,8 @@ const messageReceiver = (action, message, context) => {
 client.setReceiver(messageReceiver);
 
 bot.getMe().then(me => {
-    myName = `@me.username`;
-    console.log('My username is', me.username);
+    myName = `@${me.username}`;
+    console.log('My username is', myName);
 });
 
 // Listen for any kind of message. There are different kinds of
