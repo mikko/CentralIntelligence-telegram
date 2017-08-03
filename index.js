@@ -12,6 +12,8 @@ const client = new CIClient(CIconfig);
 const MAX_MESSAGE_LENGTH = 4096;
 const MAX_MESSAGES = 3;
 
+let myName;
+
 const splitMessage = (msg, maxLength) => {
     // const messageCount = parseInt(msg.length / maxLength) + 1;
     const messages = [];
@@ -48,10 +50,23 @@ const messageReceiver = (action, message, context) => {
 
 client.setReceiver(messageReceiver);
 
+bot.getMe().then(me => {
+    myName = `@me.username`;
+    console.log('My username is', me.username);
+});
+
 // Listen for any kind of message. There are different kinds of
 // messages.
 bot.on('message', (msg) => {
-    if(msg.text && msg.text.indexOf('/') !== -1) {
+    if (msg.text == undefined || msg.text.length === 0) {
+        return;
+    }
+    const isGroupMessage = msg.chat.type === 'group';
+    const isPrivateMessage = msg.chat.type === 'private';
+    const isCommand = msg.text[0] === '/';
+    const meMentioned = msg.text.indexOf(myName) > -1;
+    // Commands work only in private chats (TODO: and in groups marked as special)
+    if(isPrivateMessage && isCommand) {
         const msgTokens = msg.text.split(' ');
         const command = msgTokens.shift().split('/').pop();
         const params = msgTokens.join(" ");
@@ -59,8 +74,10 @@ bot.on('message', (msg) => {
         return;
     }
 
-    // Forward message to Central Intelligence
+    // Forward message to Central Intelligence only if in private chat or if mentioned
     if (msg.text && msg.text.split(" ").length > 2) {
-        client.sendMessage(msg.text, { msg });
+        if(isPrivateMessage || meMentioned) {
+            client.sendMessage(msg.text, {msg});
+        }
     }
 });
