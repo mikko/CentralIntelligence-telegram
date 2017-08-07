@@ -37,6 +37,8 @@ const splitMessage = (msg, maxLength) => {
 };
 
 const messageReceiver = (action, message, context) => {
+    // console.log('Received message', message);
+    // console.log(JSON.stringify(context, null, 4));
     if (message.length > MAX_MESSAGE_LENGTH) {
         console.log("Splitting too long message");
         const messages = splitMessage(message, MAX_MESSAGE_LENGTH);
@@ -44,11 +46,22 @@ const messageReceiver = (action, message, context) => {
             setTimeout(() => bot.sendMessage(context.msg.chat.id, msg), i * 500);
         });
     } else {
+        // message += '\n\nContext:\n' + JSON.stringify(context, null, 2);
+        console.log('Sending message to', context.msg.chat.id, message);
         bot.sendMessage(context.msg.chat.id, message);
     }
 };
 
 client.setReceiver(messageReceiver);
+
+client.setUserParser(ctx => {
+    if (ctx.msg.chat.type === 'group') {
+        return JSON.stringify(ctx.msg.chat.id);
+    }
+    return JSON.stringify(ctx.msg.from.id);
+});
+
+client.setPrivateChatParser(ctx => ctx.msg.chat.type === 'private');
 
 bot.getMe().then(me => {
     myName = `@${me.username}`;
@@ -61,6 +74,7 @@ bot.on('message', (msg) => {
     if (msg.text == undefined || msg.text.length === 0) {
         return;
     }
+
     const isGroupMessage = msg.chat.type === 'group';
     const isPrivateMessage = msg.chat.type === 'private';
     const isCommand = msg.text[0] === '/';
@@ -75,9 +89,9 @@ bot.on('message', (msg) => {
     }
 
     // Forward message to Central Intelligence only if in private chat or if mentioned
-    if (msg.text && msg.text.split(" ").length > 2) {
+    if (msg.text) {
         if(isPrivateMessage || meMentioned) {
-            client.sendMessage(msg.text, {msg});
+            client.sendMessage(msg.text, { msg });
         }
     }
 });
