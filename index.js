@@ -55,9 +55,6 @@ const messageReceiver = (action, message, context) => {
 client.setReceiver(messageReceiver);
 
 client.setUserParser(ctx => {
-    if (ctx.msg.chat.type === 'group') {
-        return JSON.stringify(ctx.msg.chat.id);
-    }
     return JSON.stringify(ctx.msg.from.id);
 });
 
