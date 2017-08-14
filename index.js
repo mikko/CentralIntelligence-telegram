@@ -40,30 +40,38 @@ const messageReceiver = (action, message, context) => {
     // console.log('Received message', message);
     // console.log(JSON.stringify(context, null, 4));
     if (message.length > MAX_MESSAGE_LENGTH) {
-        console.log("Splitting too long message");
         const messages = splitMessage(message, MAX_MESSAGE_LENGTH);
         messages.forEach((msg, i) => {
             setTimeout(() => bot.sendMessage(context.msg.chat.id, msg), i * 500);
         });
     } else {
-        // message += '\n\nContext:\n' + JSON.stringify(context, null, 2);
-        console.log('Sending message to', context.msg.chat.id, message);
         bot.sendMessage(context.msg.chat.id, message);
     }
 };
 
 client.setReceiver(messageReceiver);
 
-client.setUserParser(ctx => {
-    return JSON.stringify(ctx.msg.from.id);
-});
+const userParser = ctx => ctx.msg.from.id;
+
+client.setUserParser(userParser);
 
 client.setPrivateChatParser(ctx => ctx.msg.chat.type === 'private');
 
-bot.getMe().then(me => {
-    myName = `@${me.username}`;
-    console.log('My username is', myName);
-});
+const groupUserList = {};
+const newMessageInGroup = (ctx) => {
+    const user = userParser(ctx);
+    const groupId = ctx.msg.chat.id;
+    // Group already in list
+    if (groupUserList[groupId] === undefined) {
+        groupUserList[groupId] = {};
+    }
+    if (groupUserList[groupId][user] === undefined) {
+        groupUserList[groupId][user] = ctx.msg.from;
+
+        console.log('Notifying CI about new person in group', groupId, user.first_name, user.last_name);
+        client.sendCommand('setGroupUsers', { group: groupId, type: 'telegram', users: groupUserList[groupId] });
+    }
+};
 
 // Listen for any kind of message. There are different kinds of
 // messages.
@@ -76,6 +84,11 @@ bot.on('message', (msg) => {
     const isPrivateMessage = msg.chat.type === 'private';
     const isCommand = msg.text[0] === '/';
     const meMentioned = msg.text.indexOf(myName) > -1;
+
+    if (isGroupMessage) {
+        newMessageInGroup({ msg });
+    }
+
     // Commands work only in private chats (TODO: and in groups marked as special)
     if(isPrivateMessage && isCommand) {
         const msgTokens = msg.text.split(' ');
