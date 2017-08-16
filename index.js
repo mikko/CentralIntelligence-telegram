@@ -14,6 +14,11 @@ const MAX_MESSAGES = 3;
 
 let myName;
 
+bot.getMe().then(me => {
+    myName = `@${me.username}`;
+    console.log('My username is', myName);
+});
+
 const splitMessage = (msg, maxLength) => {
     // const messageCount = parseInt(msg.length / maxLength) + 1;
     const messages = [];
@@ -57,6 +62,15 @@ client.setUserParser(userParser);
 
 client.setPrivateChatParser(ctx => ctx.msg.chat.type === 'private');
 
+client.setUserPropertiesParser(ctx => {
+    return {
+        firstName: ctx.msg.from.first_name,
+        lastName: ctx.msg.from.last_name,
+        telegramUsername: ctx.msg.from.username,
+        telegramId: ctx.msg.from.id
+    };
+});
+
 const groupUserList = {};
 const newMessageInGroup = (ctx) => {
     const user = userParser(ctx);
@@ -90,7 +104,7 @@ bot.on('message', (msg) => {
     }
 
     // Commands work only in private chats (TODO: and in groups marked as special)
-    if(isPrivateMessage && isCommand) {
+    if (isPrivateMessage && isCommand) {
         const msgTokens = msg.text.split(' ');
         const command = msgTokens.shift().split('/').pop();
         const params = msgTokens.join(" ");
@@ -99,9 +113,8 @@ bot.on('message', (msg) => {
     }
 
     // Forward message to Central Intelligence only if in private chat or if mentioned
-    if (msg.text) {
-        if(isPrivateMessage || meMentioned) {
-            client.sendMessage(msg.text, { msg });
-        }
+    if (isPrivateMessage || meMentioned) {
+        client.sendMessage(msg.text, { msg });
     }
+
 });

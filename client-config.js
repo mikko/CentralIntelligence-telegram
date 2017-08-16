@@ -3,5 +3,6 @@ module.exports = {
     serverHost: 'localhost',
     serverPort: 3000,
     myHost: 'localhost',
-    myPort: 3004
+    myPort: 3004,
+    authKey: '' // Change this
 };
