@@ -94,7 +94,7 @@ bot.on('message', (msg) => {
         return;
     }
 
-    const isGroupMessage = msg.chat.type === 'group';
+    const isGroupMessage = msg.chat.type === 'group' || msg.chat.type === 'supergroup';
     const isPrivateMessage = msg.chat.type === 'private';
     const isCommand = msg.text[0] === '/';
     const meMentioned = msg.text.indexOf(myName) > -1;
