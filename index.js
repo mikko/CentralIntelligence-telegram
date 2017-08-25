@@ -114,7 +114,8 @@ bot.on('message', (msg) => {
 
     // Forward message to Central Intelligence only if in private chat or if mentioned
     if (isPrivateMessage || meMentioned) {
-        client.sendMessage(msg.text, { msg });
+        const message = meMentioned ? msg.text.split(myName).join('') : msg.text;
+        client.sendMessage(message, { msg });
     }
 
 });
